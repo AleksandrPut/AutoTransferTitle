@@ -30,6 +30,7 @@
 #include <NXOpen/Annotations_DefineTitleBlockBuilder.hxx>
 #include <NXOpen/Annotations_SelectTableSectionList.hxx>
 #include <NXOpen/Annotations_TableSection.hxx>
+#include <NXOpen/Annotations_TableSectionStyleBuilder.hxx>
 #include <NXOpen/Annotations_TitleBlock.hxx>
 #include <NXOpen/Annotations_TitleBlockCellBuilder.hxx>
 #include <NXOpen/Annotations_TitleBlockCellBuilderList.hxx>
@@ -153,7 +154,7 @@ int report(const char* file, int line, const char* call, int irc)
 
 void rename_title()
 {
-    UF_UI_open_listing_window();
+    //UF_UI_open_listing_window();
     //int irc = 0;
     //if (irc) throw UF_CALL(__FILE__, __LINE__, irc);
 
@@ -297,12 +298,12 @@ void rename_title()
     int indx = 0;
     int type = UF_ATTR_any;
     char title[UF_ATTR_MAX_TITLE_LEN + 1] = "";
-    UF_ATTR_value_t value;
+    //UF_ATTR_value_t value;
     tag_t obj_tag = NULL_TAG;
     tag_t t1 = NULL_TAG;
     int count = 0;
     int count1 = 0;
-    UF_PARAM_index_attribute_t attr; 
+    //UF_PARAM_index_attribute_t attr; 
     
     char* string_value;
     logical has_attribute;
@@ -349,7 +350,7 @@ void rename_title()
                     NXOpen::Annotations::EditTitleBlockBuilder* editTitleBlockBuilder1;
                     editTitleBlockBuilder1 = workPart->DraftingManager()->TitleBlocks()->CreateEditTitleBlockBuilder(titleblocks1);
                     editTitleBlockBuilder1->SetCellValueForLabel("Label22", "");
-
+                    
                     NXString nx_str = string_value;// editTitleBlockBuilder1->GetCellValueForLabel("Label22");
 
                     //UF_UI_write_listing_window(("nx_str1 2- " + (std::string)nx_str.GetLocaleText()).c_str());
@@ -394,17 +395,20 @@ void rename_title()
 
                     //NXOpen::Annotations::TitleBlock* titleBlock11(dynamic_cast<NXOpen::Annotations::TitleBlock*>(NXObjectManager::Get(obj_tag)));
 
+
                     NXOpen::Annotations::DefineTitleBlockBuilder* defineTitleBlockBuilder;
                     defineTitleBlockBuilder = workPart->DraftingManager()->TitleBlocks()->CreateDefineTitleBlockBuilder(titleBlock1);
 
                     NXOpen::Annotations::TitleBlockCellBuilderList* titleBlockCellBuilderList;
                     titleBlockCellBuilderList = defineTitleBlockBuilder->Cells();
 
-
                     NXOpen::TaggedObject* taggedObject;
                     taggedObject = titleBlockCellBuilderList->FindItem(0);
 
                     bool check = false;
+                    char* string_value1;
+                    logical has_attribute1 = false;
+
                     std::vector<NXOpen::Annotations::TitleBlockCellBuilder*> GetContents = defineTitleBlockBuilder->Cells()->GetContents();
                     //UF_UI_write_listing_window(("GetContents.size() - " + std::to_string(GetContents.size()) + "\n").c_str());
                     for (int i = 0; i < GetContents.size(); i++)
@@ -414,8 +418,42 @@ void rename_title()
                             taggedObject = titleBlockCellBuilderList->FindItem(i);
                             //UF_UI_write_listing_window(("taggedObject- " + std::to_string(taggedObject->Tag()) + "\n").c_str());
                             check = true;
+
+                            UF_ATTR_get_string_user_attribute(part, "Виддокумента", UF_ATTR_NOT_ARRAY, &string_value1, &has_attribute1);//VID_DOC_PRINT'7
+                            //UF_ATTR_assign(part, const_cast<char*>("Виддокумента"), value);//<X0.2@VID_DOC_PRINT'7>
+
+                            if (has_attribute1)
+                            {
+                                if (string_value1 != "")
+                                {
+                                    NXOpen::Annotations::TitleBlockCellBuilder* titleBlockCellBuilder22(dynamic_cast<NXOpen::Annotations::TitleBlockCellBuilder*>(taggedObject));
+                                    std::vector<NXOpen::DisplayableObject*> objects1(1);
+                                    NXOpen::DisplayableObject* displayableObject1;
+                                    displayableObject1 = titleBlockCellBuilder22->Cell();
+
+                                    objects1[0] = displayableObject1;
+                                    NXOpen::Annotations::TableEditSettingsBuilder* tableEditSettingsBuilder1;
+                                    tableEditSettingsBuilder1 = workPart->SettingsManager()->CreateTableEditSettingsBuilder(objects1);
+                                    //Размер шрифта
+                                    tableEditSettingsBuilder1->TableLettering()->SetGeneralTextSize(5.0);
+                                    //расположение текста в рамке (позиционирование)
+                                    tableEditSettingsBuilder1->TableCell()->SetTextAlignment(NXOpen::Annotations::TableCellStyleBuilder::TextAlignmentTypeTopCenter);
+                                    //Размер интервала между строками
+                                    tableEditSettingsBuilder1->TableLettering()->SetGeneralTextLineSpaceFactor(0.5);
+
+                                    NXOpen::NXObject* nXObject1;
+                                    nXObject1 = tableEditSettingsBuilder1->Commit();
+                                    tableEditSettingsBuilder1->Destroy();
+                                }
+                            }
+
+
+                            //UF_UI_write_listing_window(string_value1);
+                            //UF_UI_write_listing_window("\n");
                         }
                     }
+
+                    
 
                     NXOpen::Annotations::TitleBlockCellBuilder* titleBlockCellBuilder(dynamic_cast<NXOpen::Annotations::TitleBlockCellBuilder*>(taggedObject));
                     theSession->BeginTaskEnvironment();
@@ -764,7 +802,7 @@ void rename_title()
                           //UF_UI_write_listing_window("\n");
                           //UF_UI_write_listing_window("-------------------------------------\n");
 
-                   /*       char* string_value;
+                          /*char* string_value;
                           logical has_attribute;
                           UF_ATTR_get_string_user_attribute(obj_tag, "DB_PART_NAME", UF_ATTR_NOT_ARRAY, &string_value, &has_attribute);
                           if (has_attribute)
