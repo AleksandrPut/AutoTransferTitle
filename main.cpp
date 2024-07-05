@@ -1,3 +1,6 @@
+#pragma once
+#ifndef _MYHEADER_H_
+#define _MYHEADER_H_
 
 #include <stdio.h>
 #include <uf.h>
@@ -8,18 +11,14 @@
 #include <uf_assem.h>
 #include <uf_param.h>
 #include <uf_tabnot.h>
-
 #include <uf_view.h>
 #include <uf_draw.h>
 #include <uf_obj.h>
 #include <uf_modl.h>
 
-
 #include <iostream>
 #include <string>
 #include <vector>
-
-
 
 #include <uf_defs.h>
 #include <NXOpen/NXException.hxx>
@@ -65,35 +64,11 @@
 #include <NXOpen/TaggedObject.hxx>
 #include <NXOpen/Update.hxx>
 #include <NXOpen/Annotations_TitleBlockCellBuilder.hxx>
-
-
-#include <uf_defs.h>
-#include <NXOpen/NXException.hxx>
-#include <NXOpen/Session.hxx>
-#include <NXOpen/Annotations_BaseTitleBlockBuilder.hxx>
 #include <NXOpen/Annotations_EditTitleBlockBuilder.hxx>
-#include <NXOpen/Annotations_TitleBlock.hxx>
-#include <NXOpen/Annotations_TitleBlockCellBuilder.hxx>
-#include <NXOpen/Annotations_TitleBlockCellBuilderList.hxx>
-#include <NXOpen/Annotations_TitleBlockCollection.hxx>
-#include <NXOpen/Builder.hxx>
-#include <NXOpen/DisplayableObject.hxx>
-#include <NXOpen/Drafting_DraftingApplicationManager.hxx>
-#include <NXOpen/MenuBar_ContextMenuProperties.hxx>
-#include <NXOpen/NXObject.hxx>
-#include <NXOpen/ObjectList.hxx>
-#include <NXOpen/Part.hxx>
-#include <NXOpen/PartCollection.hxx>
-#include <NXOpen/Selection.hxx>
-#include <NXOpen/Session.hxx>
-#include <NXOpen/TaggedObject.hxx>
 #include <NXOpen/UserDefinedObjects_UserDefinedDisplayEvent.hxx>
 #include <NXOpen/UserDefinedObjects_UserDefinedEvent.hxx>
 #include <NXOpen/UserDefinedObjects_UserDefinedObject.hxx>
 #include <NXOpen/UserDefinedObjects_UserDefinedObjectDisplayContext.hxx>
-
-#include <NXOpen/NXException.hxx>
-#include <NXOpen/Session.hxx>
 #include <NXOpen/Annotations_BendTableSettingsBuilder.hxx>
 #include <NXOpen/Annotations_BillOfMaterialBuilder.hxx>
 #include <NXOpen/Annotations_CutSheetBuilder.hxx>
@@ -110,18 +85,11 @@
 #include <NXOpen/Annotations_TableCellStyleBuilder.hxx>
 #include <NXOpen/Annotations_TableColumnBuilder.hxx>
 #include <NXOpen/Annotations_TableEditSettingsBuilder.hxx>
-#include <NXOpen/Annotations_TableSectionStyleBuilder.hxx>
 #include <NXOpen/Annotations_TabularNoteStyleBuilder.hxx>
-#include <NXOpen/Builder.hxx>
-#include <NXOpen/DisplayableObject.hxx>
 #include <NXOpen/Drafting_BaseEditSettingsBuilder.hxx>
 #include <NXOpen/Drafting_SettingsManager.hxx>
-#include <NXOpen/Part.hxx>
-#include <NXOpen/PartCollection.hxx>
-#include <NXOpen/Session.hxx>
 #include <NXOpen/DraftingManager.hxx>
 #include <NXOpen/Drawings_SectionLineCollection.hxx>
-
 #include <NXOpen/NXObjectManager.hxx>
 
 using namespace NXOpen;
@@ -129,6 +97,9 @@ using namespace NXOpen;
 #include <NXSigningResource.cpp>
 #include <exception>
 
+
+#define GENERAL_TEXT_SIZE 4.0
+#define GENERAL_TEXT_LINE_SPASE 0.5
 
 #define UF_CALL(X) (report( __FILE__, __LINE__, #X, (X)))
 
@@ -143,10 +114,10 @@ int report(const char* file, int line, const char* call, int irc)
             printf("    returned error %d:  %s\n", irc, messg);
         if (!UF_UI_open_listing_window())
         {
-            UF_UI_write_listing_window(messg);
-            UF_UI_write_listing_window("\n");
-            UF_UI_write_listing_window(call);
-            UF_UI_write_listing_window(";\n");
+            UF_UI_write_listing_window(("file - " + std::string(file) + "\n").c_str());
+            UF_UI_write_listing_window(("line - " + std::to_string(line) + "\n").c_str());
+            UF_UI_write_listing_window((std::string(messg) + "\n").c_str());
+            UF_UI_write_listing_window((std::string(call) + "\n").c_str());
         }
     }
     return(irc);
@@ -294,242 +265,310 @@ void rename_title()
     //indx = UF_ATTR_cycle (part, &indx, UF_ATTR_any, title, value );
 
    
-    
-    int indx = 0;
-    int type = UF_ATTR_any;
-    char title[UF_ATTR_MAX_TITLE_LEN + 1] = "";
-    //UF_ATTR_value_t value;
     tag_t obj_tag = NULL_TAG;
-    tag_t t1 = NULL_TAG;
-    int count = 0;
-    int count1 = 0;
-    //UF_PARAM_index_attribute_t attr; 
-    
+    int type;
+    int subtype;
     char* string_value;
     logical has_attribute;
-    UF_ATTR_get_string_user_attribute(part, "DB_PART_NAME", UF_ATTR_NOT_ARRAY, &string_value, &has_attribute);
+    char* string_valueSB;
+    logical has_attributeSB;
+
+    UF_CALL(UF_ATTR_get_string_user_attribute(part, "DB_PART_NAME", UF_ATTR_NOT_ARRAY, &string_value, &has_attribute));
+    UF_CALL(UF_ATTR_get_string_user_attribute(part, "Виддокумента", UF_ATTR_NOT_ARRAY, &string_valueSB, &has_attributeSB));
     if (has_attribute)
     {
-        //UF_UI_write_listing_window(("DB_PART_NAME ###- " + (std::string)string_value).c_str());
-        //UF_UI_write_listing_window("\n");
         do
         {
             obj_tag = UF_OBJ_cycle_all(part, obj_tag);
-
-
-            //UF_ATTR_value_t attr;
-            //attr.value.string[UF_ATTR_MAX_STRING_BUFSIZE];
-
-            //UF_ATTR_read_value(part, const_cast<char*>("DB_PART_NAME"), UF_ATTR_string, &attr);
-
-            //UF_UI_write_listing_window(("Наименование - " + (std::string)attr.value.string + "\n").c_str());
-            //UF_free(attr.value.string);
-
-
-            try {
-                int type2;
-                int subtype2;
-                UF_OBJ_ask_type_and_subtype(obj_tag, &type2, &subtype2);
-                //UF_UI_write_listing_window(("type2 - " + std::to_string(type2)).c_str());
-                //UF_UI_write_listing_window(("\nsubtype2 - " + std::to_string(subtype2)).c_str());
-                //UF_UI_write_listing_window("\n");
-
-                //if (type2 == UF_constraint_type && subtype2 == 2)
-                //{
-                //    UF_UI_write_listing_window("----UF_constraint_type----\n");
-                //}
-
-                if (type2 == 25 && subtype2 == 42)
+            try 
+            {
+                if(obj_tag != NULL_TAG)
                 {
-
-                    //NXOpen::UserDefinedObjects::UserDefinedObject* userDefinedObject22;
-                    std::vector<NXOpen::Annotations::TitleBlock*> titleblocks1(1);
-                    NXOpen::Annotations::TitleBlock* titleBlock1(dynamic_cast<NXOpen::Annotations::TitleBlock*>(NXObjectManager::Get(obj_tag))); //25 42
-                    //NXOpen::Annotations::TitleBlock* titleBlock1(dynamic_cast<NXOpen::Annotations::TitleBlock*>(workPart->FindObject("HANDLE R-2982")));
-                    titleblocks1[0] = titleBlock1;
-                    NXOpen::Annotations::EditTitleBlockBuilder* editTitleBlockBuilder1;
-                    editTitleBlockBuilder1 = workPart->DraftingManager()->TitleBlocks()->CreateEditTitleBlockBuilder(titleblocks1);
-                    editTitleBlockBuilder1->SetCellValueForLabel("Label22", "");
-                    
-                    NXString nx_str = string_value;// editTitleBlockBuilder1->GetCellValueForLabel("Label22");
-
-                    //UF_UI_write_listing_window(("nx_str1 2- " + (std::string)nx_str.GetLocaleText()).c_str());
-                    //UF_UI_write_listing_window("\n");
-
-                    std::string str_lab = (std::string)nx_str.GetLocaleText();
-                    //public: void SetCellValueForLabel ( const NXString & label  ,const NXString & value );
-                    int cou = 0, num = 0;
-
-                    //Убираем перенос строки если он есть и считаем количество пробелов
-                    for (int i = 0; i < str_lab.size(); i++)
+                    UF_CALL(UF_OBJ_ask_type_and_subtype(obj_tag, &type, &subtype));
+                    if (type == 25 && subtype == 42)
                     {
-                        if (str_lab[i] == '\n')
+
+                        //NXOpen::UserDefinedObjects::UserDefinedObject* userDefinedObject22;
+                        std::vector<NXOpen::Annotations::TitleBlock*> titleblocks1(1);
+                        NXOpen::Annotations::TitleBlock* titleBlock1(dynamic_cast<NXOpen::Annotations::TitleBlock*>(NXObjectManager::Get(obj_tag))); //25 42
+                        //NXOpen::Annotations::TitleBlock* titleBlock1(dynamic_cast<NXOpen::Annotations::TitleBlock*>(workPart->FindObject("HANDLE R-2982")));
+                        titleblocks1[0] = titleBlock1;
+                        NXOpen::Annotations::EditTitleBlockBuilder* editTitleBlockBuilder1;
+                        editTitleBlockBuilder1 = workPart->DraftingManager()->TitleBlocks()->CreateEditTitleBlockBuilder(titleblocks1);
+                        editTitleBlockBuilder1->SetCellValueForLabel("Label22", "");
+
+                        NXString nx_str = string_value;// editTitleBlockBuilder1->GetCellValueForLabel("Label22");
+
+                        //UF_UI_write_listing_window(("nx_str1 2- " + (std::string)nx_str.GetLocaleText()).c_str());
+                        //UF_UI_write_listing_window("\n");
+
+                        std::string str_lab = (std::string)nx_str.GetLocaleText();
+                        //public: void SetCellValueForLabel ( const NXString & label  ,const NXString & value );
+                        int cou = 0, num = 0;
+
+
+                        //Убираем перенос строки если он есть и считаем количество пробелов
+                        for (int i = 0; i < str_lab.size(); i++)
                         {
-                            str_lab[i] = ' ';
-                        }
-                        if (str_lab[i] == ' ')
-                            num++;
-                    }
-                    //Установим перенос строки вместо пробела. Всегда берем средний пробел
-                    for (int i = 0; i < str_lab.size(); i++)
-                    {
-                        if (str_lab[i] == ' ')
-                        {
-                            cou++;
-                            if (cou == num / 2 && num > 3)
-                                str_lab[i] = '\n';
-                        }
-                    }
-
-                    UF_ATTR_value_t value;
-                    value.type = UF_ATTR_string;
-                    value.value.string = const_cast<char*>(str_lab.c_str());
-                    UF_ATTR_assign(part, const_cast<char*>("COPY_DB_PART_NAME"), value);
-                    //UF_MODL_update();
-                    //editTitleBlockBuilder1->SetCellValueForLabel("Label22", str_lab);
-
-                    //NXOpen::Annotations::TitleBlock* titleBlock11(dynamic_cast<NXOpen::Annotations::TitleBlock*>(workPart->FindObject("ENTITY 25 9 1")));
-
-                    //UF_UI_write_listing_window(("titleBlock11- " + std::to_string(titleBlock11->Tag()) + "\n").c_str());
-                    //UF_UI_write_listing_window(("titleBlock1- " + std::to_string(titleBlock1->Tag()) + "\n").c_str());
-
-                    //NXOpen::Annotations::TitleBlock* titleBlock11(dynamic_cast<NXOpen::Annotations::TitleBlock*>(NXObjectManager::Get(obj_tag)));
-
-
-                    NXOpen::Annotations::DefineTitleBlockBuilder* defineTitleBlockBuilder;
-                    defineTitleBlockBuilder = workPart->DraftingManager()->TitleBlocks()->CreateDefineTitleBlockBuilder(titleBlock1);
-
-                    NXOpen::Annotations::TitleBlockCellBuilderList* titleBlockCellBuilderList;
-                    titleBlockCellBuilderList = defineTitleBlockBuilder->Cells();
-
-                    NXOpen::TaggedObject* taggedObject;
-                    taggedObject = titleBlockCellBuilderList->FindItem(0);
-
-                    bool check = false;
-                    char* string_value1;
-                    logical has_attribute1 = false;
-
-                    std::vector<NXOpen::Annotations::TitleBlockCellBuilder*> GetContents = defineTitleBlockBuilder->Cells()->GetContents();
-                    //UF_UI_write_listing_window(("GetContents.size() - " + std::to_string(GetContents.size()) + "\n").c_str());
-                    for (int i = 0; i < GetContents.size(); i++)
-                    {
-                        if (i == 21)
-                        {
-                            taggedObject = titleBlockCellBuilderList->FindItem(i);
-                            //UF_UI_write_listing_window(("taggedObject- " + std::to_string(taggedObject->Tag()) + "\n").c_str());
-                            check = true;
-
-                            UF_ATTR_get_string_user_attribute(part, "Виддокумента", UF_ATTR_NOT_ARRAY, &string_value1, &has_attribute1);//VID_DOC_PRINT'7
-                            //UF_ATTR_assign(part, const_cast<char*>("Виддокумента"), value);//<X0.2@VID_DOC_PRINT'7>
-
-                            if (has_attribute1)
+                            if (str_lab[i] == '\n')
                             {
-                                if (string_value1 != "")
+                                str_lab[i] = ' ';
+                            }
+                            if (str_lab[i] == ' ')
+                                num++;
+                        }
+                        //Установим перенос строки вместо пробела. Всегда берем средний пробел
+                        if (str_lab.size() < 100)
+                        {
+                            for (int i = 0; i < str_lab.size(); i++)
+                            {
+                                if (str_lab[i] == ' ')
                                 {
-                                    NXOpen::Annotations::TitleBlockCellBuilder* titleBlockCellBuilder22(dynamic_cast<NXOpen::Annotations::TitleBlockCellBuilder*>(taggedObject));
-                                    std::vector<NXOpen::DisplayableObject*> objects1(1);
-                                    NXOpen::DisplayableObject* displayableObject1;
-                                    displayableObject1 = titleBlockCellBuilder22->Cell();
-
-                                    objects1[0] = displayableObject1;
-                                    NXOpen::Annotations::TableEditSettingsBuilder* tableEditSettingsBuilder1;
-                                    tableEditSettingsBuilder1 = workPart->SettingsManager()->CreateTableEditSettingsBuilder(objects1);
-                                    //Размер шрифта
-                                    tableEditSettingsBuilder1->TableLettering()->SetGeneralTextSize(5.0);
-                                    //расположение текста в рамке (позиционирование)
-                                    tableEditSettingsBuilder1->TableCell()->SetTextAlignment(NXOpen::Annotations::TableCellStyleBuilder::TextAlignmentTypeTopCenter);
-                                    //Размер интервала между строками
-                                    tableEditSettingsBuilder1->TableLettering()->SetGeneralTextLineSpaceFactor(0.5);
-
-                                    NXOpen::NXObject* nXObject1;
-                                    nXObject1 = tableEditSettingsBuilder1->Commit();
-                                    tableEditSettingsBuilder1->Destroy();
+                                    cou++;
+                                    if (cou == num / 2 && num > 3)
+                                    {
+                                        str_lab[i] = '\n';
+                                    }
                                 }
                             }
-
-
-                            //UF_UI_write_listing_window(string_value1);
-                            //UF_UI_write_listing_window("\n");
                         }
+                        //Установим перенос строки вместо пробела. Если встретили пробел после 40 символа
+                        if (str_lab.size() > 100)
+                        {
+                            int new_str_size = 0;
+                            for (int i = 0; i < str_lab.size(); i++)
+                            {
+                                new_str_size++;
+                                if (str_lab[i] == ' ' && new_str_size > 40)
+                                {
+                                    new_str_size = 0;
+                                    str_lab[i] = '\n';
+                                }
+                            }
+                        }
+
+                        UF_ATTR_value_t value;
+                        value.type = UF_ATTR_string;
+                        value.value.string = const_cast<char*>(str_lab.c_str());
+                        UF_CALL(UF_ATTR_assign(part, const_cast<char*>("COPY_DB_PART_NAME"), value));
+
+
+                        UF_ATTR_value_t valueSB;
+                        valueSB.type = UF_ATTR_string;
+                        valueSB.value.string = const_cast<char*>(string_valueSB);
+                        UF_CALL(UF_ATTR_assign(part, const_cast<char*>("COPY_VIEW_DOC"), valueSB));
+                       
+                        NXOpen::Annotations::DefineTitleBlockBuilder* defineTitleBlockBuilder;
+                        defineTitleBlockBuilder = workPart->DraftingManager()->TitleBlocks()->CreateDefineTitleBlockBuilder(titleBlock1);
+
+                        NXOpen::Annotations::TitleBlockCellBuilderList* titleBlockCellBuilderList;
+                        titleBlockCellBuilderList = defineTitleBlockBuilder->Cells();
+
+                        NXOpen::TaggedObject* taggedObject;
+                        taggedObject = titleBlockCellBuilderList->FindItem(0);
+
+                        NXOpen::TaggedObject* taggedObjectSB;
+                        taggedObjectSB = titleBlockCellBuilderList->FindItem(0);
+
+                        bool check = false, checkSB = false;
+                        char* string_value1;
+                        logical has_attribute1 = false;
+
+                        for (int i = 0; i < titleBlockCellBuilderList->Length(); i++)
+                        {
+                            if (i == 21)//21 это номер строки в таблице
+                            {
+                                //NXOpen::TaggedObject* taggedObject;
+                                taggedObject = titleBlockCellBuilderList->FindItem(i);
+                                //UF_UI_write_listing_window(("taggedObject- " + std::to_string(taggedObject->Tag()) + "\n").c_str());
+                                check = true;
+                                //Получает значение и ссылочную строку (если есть) атрибута строкового типа, если он существует.
+                                //UF_CALL(UF_ATTR_get_string_user_attribute(part, "Виддокумента", UF_ATTR_NOT_ARRAY, &string_value1, &has_attribute1));//VID_DOC_PRINT'7
+                                //UF_ATTR_assign(part, const_cast<char*>("Виддокумента"), value);//<X0.2@VID_DOC_PRINT'7>
+                                //UF_UI_write_listing_window(("string_value1 - " + std::string(string_value1) + "\n").c_str());
+                                //if (has_attribute1)
+                                {
+                                    //if (string_value1 != "")
+                                    {
+                                        NXOpen::Annotations::TitleBlockCellBuilder* titleBlockCellBuilder(dynamic_cast<NXOpen::Annotations::TitleBlockCellBuilder*>(taggedObject));
+                                        std::vector<NXOpen::DisplayableObject*> objects1(1);
+                                        NXOpen::DisplayableObject* displayableObject1;
+                                        displayableObject1 = titleBlockCellBuilder->Cell();
+
+                                        objects1[0] = displayableObject1;
+                                        NXOpen::Annotations::TableEditSettingsBuilder* tableEditSettingsBuilder1;
+                                        tableEditSettingsBuilder1 = workPart->SettingsManager()->CreateTableEditSettingsBuilder(objects1);
+                                        //Размер шрифта
+                                        tableEditSettingsBuilder1->TableLettering()->SetGeneralTextSize(GENERAL_TEXT_SIZE);
+                                        //расположение текста в рамке (позиционирование)
+                                        tableEditSettingsBuilder1->TableCell()->SetTextAlignment(NXOpen::Annotations::TableCellStyleBuilder::TextAlignmentTypeTopCenter);
+                                        //Размер интервала между строками
+                                        tableEditSettingsBuilder1->TableLettering()->SetGeneralTextLineSpaceFactor(GENERAL_TEXT_LINE_SPASE);
+
+                                        NXOpen::NXObject* nXObject1;
+                                        nXObject1 = tableEditSettingsBuilder1->Commit();
+                                        tableEditSettingsBuilder1->Destroy();
+                                    }
+                                }
+                            }
+                            if (i == 63)//63 это номер строки в таблице
+                            {
+                                taggedObjectSB = titleBlockCellBuilderList->FindItem(i);
+                                checkSB = true;
+                                //UF_CALL(UF_ATTR_get_string_user_attribute(part, "Виддокумента", UF_ATTR_NOT_ARRAY, &string_value1, &has_attribute1));//VID_DOC_PRINT'7
+                                //UF_ATTR_assign(part, const_cast<char*>("Виддокумента"), value);//<X0.2@VID_DOC_PRINT'7>
+                                //UF_UI_write_listing_window(("string_value1 - " + std::string(string_value1) + "\n").c_str());
+                                //if (has_attribute1)
+                                {
+                                    //if (string_value1 != "")
+                                    {
+                                        NXOpen::Annotations::TitleBlockCellBuilder* titleBlockCellBuilder(dynamic_cast<NXOpen::Annotations::TitleBlockCellBuilder*>(taggedObjectSB));
+                                        std::vector<NXOpen::DisplayableObject*> objects1(1);
+                                        NXOpen::DisplayableObject* displayableObject1;
+                                        displayableObject1 = titleBlockCellBuilder->Cell();
+
+                                        objects1[0] = displayableObject1;
+                                        NXOpen::Annotations::TableEditSettingsBuilder* tableEditSettingsBuilder1;
+                                        tableEditSettingsBuilder1 = workPart->SettingsManager()->CreateTableEditSettingsBuilder(objects1);
+                                        //Размер шрифта
+                                        tableEditSettingsBuilder1->TableLettering()->SetGeneralTextSize(GENERAL_TEXT_SIZE - 0.4);
+                                        //расположение текста в рамке (позиционирование)
+                                        tableEditSettingsBuilder1->TableCell()->SetTextAlignment(NXOpen::Annotations::TableCellStyleBuilder::TextAlignmentTypeTopCenter);
+                                        //Размер интервала между строками
+                                        tableEditSettingsBuilder1->TableLettering()->SetGeneralTextLineSpaceFactor(GENERAL_TEXT_LINE_SPASE);
+
+                                        NXOpen::NXObject* nXObject1;
+                                        nXObject1 = tableEditSettingsBuilder1->Commit();
+                                        tableEditSettingsBuilder1->Destroy();
+                                    }
+                                }
+                            }
+                        }
+
+                        NXOpen::Annotations::TitleBlockCellBuilder* titleBlockCellBuilder = dynamic_cast<NXOpen::Annotations::TitleBlockCellBuilder*>(taggedObject);
+                        //theSession->BeginTaskEnvironment();
+                        if (check)
+                        {
+                            UF_CALL(UF_TABNOT_set_cell_text(titleBlockCellBuilder->Cell()->Tag(), "<WRef1*0@COPY_DB_PART_NAME>"));
+                        }
+                        NXOpen::Annotations::AssociativeText* associativeText1;
+                        associativeText1 = workPart->Annotations()->CreateAssociativeText();
+                        NXString text4;
+                        text4 = associativeText1->GetPartAttributeText("COPY_DB_PART_NAME");
+                        delete associativeText1;
+                        titleBlockCellBuilder->EditCell(false, 3, "", "Label22", true);
+
+
+                        NXOpen::Annotations::TitleBlockCellBuilder* titleBlockCellBuilderSB = dynamic_cast<NXOpen::Annotations::TitleBlockCellBuilder*>(taggedObjectSB);
+                        if (checkSB)
+                        {
+                            UF_CALL(UF_TABNOT_set_cell_text(titleBlockCellBuilderSB->Cell()->Tag(), "<WRef1*0@COPY_VIEW_DOC>"));
+                        }
+                        NXOpen::Annotations::AssociativeText* associativeText2;
+                        associativeText2 = workPart->Annotations()->CreateAssociativeText();
+                        NXString text2;
+                        text2 = associativeText2->GetPartAttributeText("COPY_VIEW_DOC");
+                        delete associativeText2;
+                        titleBlockCellBuilderSB->EditCell(false, 3, "", "Метка2", true);
+
+
+                        NXOpen::NXObject* nXObject4;
+                        nXObject4 = defineTitleBlockBuilder->Commit();
+                        defineTitleBlockBuilder->Destroy();
                     }
-
-                    
-
-                    NXOpen::Annotations::TitleBlockCellBuilder* titleBlockCellBuilder(dynamic_cast<NXOpen::Annotations::TitleBlockCellBuilder*>(taggedObject));
-                    theSession->BeginTaskEnvironment();
-                    if (check)
-                        UF_TABNOT_set_cell_text(titleBlockCellBuilder->Cell()->Tag(), "<WRef1*0@COPY_DB_PART_NAME>");
-
-                    NXOpen::Annotations::AssociativeText* associativeText1;
-                    associativeText1 = workPart->Annotations()->CreateAssociativeText();
-                    NXString text4;
-                    text4 = associativeText1->GetPartAttributeText("COPY_DB_PART_NAME");//COPY_DB_PART_NAME
-                    delete associativeText1;
-                    titleBlockCellBuilder->EditCell(false, 3, "", "Label22", true);
-
-                    theSession->DeleteUndoMarksSetInTaskEnvironment();
-                    theSession->EndTaskEnvironment();
-                    NXOpen::NXObject* nXObject4;
-                    nXObject4 = defineTitleBlockBuilder->Commit();
-                    defineTitleBlockBuilder->Destroy();
-
-
-
-                    /*UF_UI_write_listing_window(("str_lab - " + str_lab).c_str());
-                    UF_UI_write_listing_window("\n");
-
-                    UF_UI_write_listing_window(("label - " + (std::string)nx_str.GetLocaleText()).c_str());
-                    UF_UI_write_listing_window("\n");
-
-
-
-                    std::vector<NXOpen::DisplayableObject*> objects1(1);
-                    //NXOpen::DisplayableObject* displayableObject1(dynamic_cast<NXOpen::DisplayableObject*>(NXObjectManager::Get(obj_tag)));//160 2    218 2
-                    NXOpen::DisplayableObject* displayableObject1(dynamic_cast<NXOpen::DisplayableObject*>(workPart->FindObject("HANDLE R-2225")));
-                    objects1[0] = displayableObject1;
-
-
-                    int type3;
-                    int subtype3;
-                    UF_OBJ_ask_type_and_subtype(objects1[0]->Tag(), &type3, &subtype3);
-                    UF_UI_write_listing_window(("type3 - " + std::to_string(type3)).c_str());
-                    UF_UI_write_listing_window(("\nsubtype3 - " + std::to_string(subtype3)).c_str());
-                    UF_UI_write_listing_window("\n");
-
-
-                    NXOpen::Annotations::TableEditSettingsBuilder* tableEditSettingsBuilder1;
-                    tableEditSettingsBuilder1 = workPart->SettingsManager()->CreateTableEditSettingsBuilder(objects1);
-
-                    std::vector<NXOpen::Drafting::BaseEditSettingsBuilder*> editsettingsbuilders1(1);
-                    editsettingsbuilders1[0] = tableEditSettingsBuilder1;
-                    workPart->SettingsManager()->ProcessForMultipleObjectsSettings(editsettingsbuilders1);
-
-                    std::vector<NXOpen::Annotations::TableCellStyleBuilder::FitMethodType> fitmethods1(2);
-                    fitmethods1[0] = NXOpen::Annotations::TableCellStyleBuilder::FitMethodTypeWrap;
-                    fitmethods1[1] = NXOpen::Annotations::TableCellStyleBuilder::FitMethodTypeAutoSizeText;
-                    tableEditSettingsBuilder1->TableCell()->SetFitMethods(fitmethods1);
-
-                    std::vector<NXOpen::Annotations::TableCellStyleBuilder::FitMethodType> fitmethods2(3);
-                    fitmethods2[0] = NXOpen::Annotations::TableCellStyleBuilder::FitMethodTypeWrap;
-                    fitmethods2[1] = NXOpen::Annotations::TableCellStyleBuilder::FitMethodTypeAutoSizeText;
-                    fitmethods2[2] = NXOpen::Annotations::TableCellStyleBuilder::FitMethodTypeOverwriteBorder;
-                    tableEditSettingsBuilder1->TableCell()->SetFitMethods(fitmethods2);
-
-                    NXOpen::NXObject* nXObject1;
-                    nXObject1 = tableEditSettingsBuilder1->Commit();
-
-                    tableEditSettingsBuilder1->Destroy();/**/
-
-
                 }
             }
             catch (std::exception ex)
             {
-                break;
+                //break;
                 uc1601(const_cast<char*>("~ERROR~"), 1);
             };
+        } while (obj_tag != NULL_TAG);/**/
+    }
+    UF_free(string_value);
+    UF_free(string_valueSB);
 
-            /*       int type;
+    /*char  title[UF_ATTR_MAX_TITLE_BUFSIZE];
+    UF_ATTR_value_t value;
+    value.type = UF_ATTR_any;
+    int indx = 0;
+    while (!(UF_ATTR_cycle(part, &indx, UF_ATTR_any, title, &value)) && (indx != 0))
+    {
+        switch (value.type)
+        {
+        case UF_ATTR_bool:
+            UF_UI_write_listing_window(("UF_ATTR_bool - " + std::to_string(value.value.boolean)).c_str());
+            UF_UI_write_listing_window("\n");
+            break;
+        case UF_ATTR_integer:
+            UF_UI_write_listing_window(("UF_ATTR_integer - " + std::to_string(value.value.integer)).c_str());
+            UF_UI_write_listing_window("\n");
+            break;
+        case UF_ATTR_real:
+            UF_UI_write_listing_window(("UF_ATTR_real - " + std::to_string(value.value.real)).c_str());
+            UF_UI_write_listing_window("\n");
+            break;
+        case UF_ATTR_string:
+            UF_UI_write_listing_window(("UF_ATTR_string - " + (std::string)value.value.string).c_str());
+            UF_UI_write_listing_window("\n");
+            UF_free(value.value.string);
+            break;
+        case UF_ATTR_reference:
+            UF_UI_write_listing_window(("UF_ATTR_reference - " + (std::string)value.value.reference).c_str());
+            UF_UI_write_listing_window("\n");
+            UF_free(value.value.reference);
+            break;
+        default:	break;
+        }
+    }
+
+    {
+        UF_initialize();
+        tag_t object = 49586;
+        int indx = 0;
+        int type = UF_ATTR_any;
+        char title[UF_ATTR_MAX_TITLE_LEN + 1] = "";
+        UF_ATTR_value_t value;
+        UF_ATTR_cycle(object, &indx, type, title, &value);
+        UF_UI_open_listing_window();
+        while (indx)
+        {
+            UF_UI_write_listing_window(title);
+            UF_UI_write_listing_window("=");
+            UF_UI_write_listing_window(value.value.string);
+            UF_UI_write_listing_window("\n");
+            UF_ATTR_cycle(object, &indx, type, title, &value);
+        }
+        UF_free(value.value.string);
+        UF_terminate();
+    }*/
+}
+
+
+void ufusr(char* param, int* retcod, int param_len)
+{
+    static unsigned char* c;
+    c = { nxauthblock };
+
+    int status = 0;
+    status = UF_initialize();
+    if (!status)
+    {
+        rename_title();
+    }
+    UF_terminate();
+}
+
+int ufusr_ask_unload(void)
+{
+    return (UF_UNLOAD_IMMEDIATELY);
+}
+
+
+/*
+void test()
+{
+/*       int type;
                    int subtype;
                    UF_OBJ_ask_type_and_subtype(obj_tag, &type, &subtype);
 
@@ -793,16 +832,14 @@ void rename_title()
                            tableEditSettingsBuilder1->TableLettering()->SetGeneralTextSize(4.0);
                            NXOpen::NXObject* nXObject1;
                            nXObject1 = tableEditSettingsBuilder1->Commit();
-                           tableEditSettingsBuilder1->Destroy();/**/
-                           //   }
-                          //}
+                           tableEditSettingsBuilder1->Destroy();/**/ //   }
+ //}
                           //char name[200];
                           //UF_OBJ_ask_name(obj_tag, name);
                           //UF_UI_write_listing_window(("name - " + (std::string)name).c_str());
                           //UF_UI_write_listing_window("\n");
                           //UF_UI_write_listing_window("-------------------------------------\n");
-
-                          /*char* string_value;
+/*char* string_value;
                           logical has_attribute;
                           UF_ATTR_get_string_user_attribute(obj_tag, "DB_PART_NAME", UF_ATTR_NOT_ARRAY, &string_value, &has_attribute);
                           if (has_attribute)
@@ -879,83 +916,7 @@ void rename_title()
                                   UF_ATTR_cycle(obj_tag, &indx, type, title, &value);
                               }
                               //UF_free(value.value.string);
-                          }/**/
-        } while (obj_tag != NULL_TAG);/**/
-    }
+                          }
+}/**/
 
-   
-    /*char  title[UF_ATTR_MAX_TITLE_BUFSIZE];
-    UF_ATTR_value_t value;
-    value.type = UF_ATTR_any;
-    int indx = 0;
-    while (!(UF_ATTR_cycle(part, &indx, UF_ATTR_any, title, &value)) && (indx != 0))
-    {
-        switch (value.type)
-        {
-        case UF_ATTR_bool:
-            UF_UI_write_listing_window(("UF_ATTR_bool - " + std::to_string(value.value.boolean)).c_str());
-            UF_UI_write_listing_window("\n");
-            break;
-        case UF_ATTR_integer:
-            UF_UI_write_listing_window(("UF_ATTR_integer - " + std::to_string(value.value.integer)).c_str());
-            UF_UI_write_listing_window("\n");
-            break;
-        case UF_ATTR_real:
-            UF_UI_write_listing_window(("UF_ATTR_real - " + std::to_string(value.value.real)).c_str());
-            UF_UI_write_listing_window("\n");
-            break;
-        case UF_ATTR_string:
-            UF_UI_write_listing_window(("UF_ATTR_string - " + (std::string)value.value.string).c_str());
-            UF_UI_write_listing_window("\n");
-            UF_free(value.value.string);
-            break;
-        case UF_ATTR_reference:
-            UF_UI_write_listing_window(("UF_ATTR_reference - " + (std::string)value.value.reference).c_str());
-            UF_UI_write_listing_window("\n");
-            UF_free(value.value.reference);
-            break;
-        default:	break;
-        }
-    }
-
-    {
-        UF_initialize();
-        tag_t object = 49586;
-        int indx = 0;
-        int type = UF_ATTR_any;
-        char title[UF_ATTR_MAX_TITLE_LEN + 1] = "";
-        UF_ATTR_value_t value;
-        UF_ATTR_cycle(object, &indx, type, title, &value);
-        UF_UI_open_listing_window();
-        while (indx)
-        {
-            UF_UI_write_listing_window(title);
-            UF_UI_write_listing_window("=");
-            UF_UI_write_listing_window(value.value.string);
-            UF_UI_write_listing_window("\n");
-            UF_ATTR_cycle(object, &indx, type, title, &value);
-        }
-        UF_free(value.value.string);
-        UF_terminate();
-    }*/
-}
-
-
-void ufusr(char* param, int* retcod, int param_len)
-{
-    static unsigned char* c;
-    c = { nxauthblock };
-
-    int status = 0;
-    status = UF_initialize();
-    if (!status)
-    {
-        rename_title();
-    }
-    UF_terminate();
-}
-
-int ufusr_ask_unload(void)
-{
-    return (UF_UNLOAD_IMMEDIATELY);
-}
+#endif
